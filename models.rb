@@ -21,7 +21,6 @@ class User
 
     def getCalendar
         cal = Icalendar::Calendar.new
-        puts cal.inspect
         bookings.each do |booking|
             cal.add_event(booking.ical)
         end
@@ -44,7 +43,6 @@ class Booking
     belongs_to :user
 
     def self.create_from_scrape(user, dateStr, timeStr, type, typeStr, course, uniqueId)
-        print "Creating with id #{uniqueId}"
         date = Date.strptime(dateStr)
         if !timeStr.empty?
             dateTimeStr = "#{dateStr}T#{timeStr}"
@@ -52,7 +50,6 @@ class Booking
         end
         b = Booking.first_or_create(:uniqueId => uniqueId, :user => user)
         b.attributes = {:user => user, :date => date, :type => type, :typeStr => typeStr, :course => course}
-        puts uniqueId
         b.save
         return b
     end
@@ -63,7 +60,12 @@ class Booking
 
     def ical
         event = Icalendar::Event.new
-        event.dtstart = @date
+        if @date.hour == 0
+            # Only date if we have no hours
+            event.dtstart = Icalendar::Values::Date.new(@date)
+        else
+            event.dtstart = @date
+        end
         event.summary = @typeStr
         event.location = @course
         return event
