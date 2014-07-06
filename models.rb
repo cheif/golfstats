@@ -21,6 +21,9 @@ class User
 
     def getCalendar
         cal = Icalendar::Calendar.new
+        cal.timezone do |t|
+            t.tzid = "Europe/Stockholm"
+        end
         bookings.each do |booking|
             cal.add_event(booking.ical)
         end
