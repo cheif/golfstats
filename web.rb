@@ -20,5 +20,6 @@ end
 get '/cal/:golfId/?' do
     golfId = params[:golfId]
     u = User.first(:golfId => golfId)
+    u.scrape
     u.getCalendar.to_ical
 end
