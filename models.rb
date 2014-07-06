@@ -68,6 +68,8 @@ class Booking
             event.dtstart = Icalendar::Values::Date.new(@date)
         else
             event.dtstart = @date
+            # End 4 hours later
+            event.dtend = @date + Rational(4, 24)
         end
         event.summary = @typeStr
         event.location = @course
