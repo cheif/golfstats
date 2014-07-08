@@ -1,0 +1,13 @@
+.content {
+    max-width: 900px;
+    margin: 100px auto;
+}
+
+.pure-u-1-2 {
+    box-sizing: border-box;
+    padding: 0 2em;
+}
+
+.border-right {
+    border-right: 1px solid #828282
+}

@@ -4,6 +4,7 @@ gem 'mechanize'
 gem 'json'
 gem 'data_mapper'
 gem 'icalendar'
+gem 'haml'
 
 group :production do
     gem "pg"

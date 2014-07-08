@@ -1,0 +1,40 @@
+%html{'ng-app' => 'golfcal'}
+  %head
+    %title Golf.se - iCal
+    %link{:rel => :stylesheet, :text => "text/css", :href => "//yui.yahooapis.com/pure/0.5.0/pure-min.css"}
+    %link{:rel => :stylesheet, :text => "text/css", :href => "style.css"}
+    %meta{:name => "viewport", :content => "width=device-width, initial-scale=1"}
+    %script{:src => "//ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.14/angular.min.js"}
+    %script{:src => "//ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.14/angular-resource.min.js"}
+    %script{:src => "app.js"}
+  %body
+    .content
+      .pure-g
+        .pure-u-1-2.border-right
+          %h3 Golf.se i din kalender
+          %p
+            På den här sidan kan du skapa en så kallad .ical-feed för din kalender på golf.se, den kan du sedan
+            importera i valfri kalender
+          %p
+            Nästan alla kalendrar stödjer import från iCal, och den håller sig uppdaterad automatiskt 
+        .pure-u-1-2{'ng-controller' => "CalCtrl"}
+          %div{'ng-hide' => 'created'}
+            %h3 Skapa kalender
+            %form.pure-form.pure-form-aligned
+              %fieldset
+                .pure-control-group
+                  %label Golf-ID*
+                  %input.pure-input-1-2{:type => "text", 'ng-model' => 'user.golfId', :placeholder => "YYMMDD-XXX", :pattern => "[0-9]{6}-[0-9]{3}"}
+                .pure-control-group
+                  %label Lösenord*
+                  %input.pure-input-1-2{:type => "password", 'ng-model' => 'user.password', :placeholder => "******"}
+                .pure-controls
+                  %button.pure-button.pure-button-primary{'ng-click' => 'create()', 'ng-disabled' => 'loading'} 
+                    %span{'ng-hide' => 'loading'} Skapa
+                    %span{'ng-show' => 'loading'} Skapar...
+          %div{'ng-show' => 'created'}
+            %h3 Kalender skapad
+            %p Din kalender är nu skapad och har länken: 
+            %a{:href => "{{calURL}}"} {{calURL}}
+            %p Du kan använda länken ovan för att lägga till den i t.ex. Google Calendar
+
