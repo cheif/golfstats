@@ -28,6 +28,12 @@ class GolfSE
             course = listing.attribute('data-coursename')
             dateStr = listing.search('.span2').first.attribute('title').content
             timeStr = listing.search('.span3').first.content
+            players = listing.search('.span9').first.search('i').map do |player|
+                {
+                    :name => player.attribute('data-name'),
+                    :hcp => player.attribute('data-hcp')
+                }
+            end
             btn = listing.search('.span10 > button').first
             uniqueId = btn.attribute('data-bookingcode')
             if !uniqueId
@@ -35,7 +41,7 @@ class GolfSE
             end
             uniqueId = uniqueId.content
             typeStr = listing.search('.span6').first.content
-            Booking.create_from_scrape(@user, dateStr, timeStr, type, typeStr, course, uniqueId)
+            Booking.create_from_scrape(@user, dateStr, timeStr, type, typeStr, course, players, uniqueId)
         end
     end
 end

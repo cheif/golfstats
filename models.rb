@@ -44,8 +44,10 @@ class Booking
     property :course,       String
 
     belongs_to :user
+    
+    has n, :coPlayers
 
-    def self.create_from_scrape(user, dateStr, timeStr, type, typeStr, course, uniqueId)
+    def self.create_from_scrape(user, dateStr, timeStr, type, typeStr, course, players, uniqueId)
         date = Date.strptime(dateStr)
         if !timeStr.empty?
             dateTimeStr = "#{dateStr}T#{timeStr}"
@@ -53,7 +55,15 @@ class Booking
         end
         b = Booking.first_or_create(:uniqueId => uniqueId, :user => user)
         b.attributes = {:user => user, :date => date, :type => type, :typeStr => typeStr, :course => course}
+        players.each do |player|
+        
+            p = CoPlayer.first_or_create(:booking => b, :name => player[:name])
+            puts p
+            p[:hcp] = player[:hcp]
+            p.save
+        end
         b.save
+        puts b.coPlayers
         return b
     end
 
@@ -73,8 +83,25 @@ class Booking
         end
         event.summary = @typeStr
         event.location = @course
+        event.description = @typeStr
+        puts @CoPlayers
+        if @coPlayers
+            player_arr = @CoPlayer.map do |player|
+                "#{player.name} (#{player.hcp})"
+            end
+            event.description += " med " + player_arr.join(' och ')
+        end
         return event
     end
+end
+
+class CoPlayer
+    include DataMapper::Resource
+    property :id,       Serial
+    property :name,     String
+    property :hcp,      String
+
+    belongs_to :booking
 end
 
 DataMapper.finalize
