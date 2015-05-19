@@ -44,4 +44,41 @@ class GolfSE
             Booking.create_from_scrape(@user, dateStr, timeStr, type, typeStr, course, players, uniqueId)
         end
     end
+
+    def scrapeRounds
+        url = "https://www9.golf.se/MyPage/Stats/Stats.aspx"
+        page = @agent.get(url)
+        scriptTag = page.search("head > script").last
+        m = /_roundData\s*= (.*?);/.match(scriptTag.content)
+        jsonData = m[1]
+        json_rounds = JSON.parse(jsonData)
+        rounds = json_rounds.map do |k, json|
+            Round.create_from_scrape(@user, json)
+        end
+    end
+
+    def scrapeHoles(round)
+        url = "https://www9.golf.se/MyPage/Stats/Item.aspx?r=#{round.id}"
+        page = @agent.get(url)
+        scriptTag = page.search("head > script").last
+        
+        if round.course.holes.count == 0
+            m = /_hole\s*= (.*?);/.match(scriptTag.content)
+            json_holes = JSON.parse(m[1])
+            json_holes.each do |_, data|
+                Hole.first_or_create(:course => round.course, 
+                                     :number => data['Number'],
+                                     :par => data['Par'], :index => data['Index'])
+            end
+        end
+
+        m = /_data\s*= (.*?);/.match(scriptTag.content)
+        data = JSON.parse(m[1])
+        json_results = data['Holes']
+        json_results.each do |data|
+            hole = Hole.first(:course => round.course, :number => data['Number'])
+            HoleResult.first_or_create(:round => round, :hole => hole,
+                                       :score => data['GrossScore'])
+        end
+    end
 end

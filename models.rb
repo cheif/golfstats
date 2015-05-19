@@ -19,6 +19,11 @@ class User
         golfse.scrape
     end
 
+    def scrapeRounds
+        golfse = GolfSE.new(self)
+        golfse.scrapeRounds
+    end
+
     def getCalendar
         cal = Icalendar::Calendar.new
         cal.timezone do |t|
@@ -30,7 +35,62 @@ class User
         cal.publish
         cal
     end
+end
 
+class Course
+    include DataMapper::Resource
+
+    property :id,           Serial
+    property :name,         String
+
+    has n, :rounds
+    has n, :holes
+end
+
+class Hole
+    include DataMapper::Resource
+
+    property :id,           Serial
+    property :number,       Integer
+    property :par,          Integer
+    property :index,        Integer
+
+    belongs_to :course
+end
+
+class Round
+    include DataMapper::Resource
+
+    property :id,           Integer,    :key => true
+    property :date,         DateTime
+
+    belongs_to :course
+    belongs_to :user
+    has n, :holeResults
+
+    def self.create_from_scrape(user, json_data)
+        date = DateTime.strptime(json_data['Date'], "%Y%m%dT%H%M%S")
+        id = json_data['RefId']
+        courseName = json_data['CourseName']
+        course = Course.first_or_create(:name => courseName)
+        Round.first_or_create(:date => date, :id => id, 
+                              :course => course, :user => user)
+    end
+
+    def scrapeHoles
+        golfse = GolfSE.new(self.user)
+        golfse.scrapeHoles(self)
+    end
+end
+
+class HoleResult
+    include DataMapper::Resource
+
+    property :id,           Serial
+    property :score,        Integer
+
+    belongs_to :round
+    belongs_to :hole
 end
 
 class Booking
