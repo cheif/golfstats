@@ -6,36 +6,38 @@ require 'haml'
 require './models.rb'
 
 get '/' do
-    haml :index
+  haml :index
 end
 
 get '/:golfId/' do
-    haml :detailPage
+  haml :detailPage
 end
 
 post '/createCal/' do
-    content_type :json
-    params = JSON.parse(request.env["rack.input"].read)
-    golfId = params['golfId']
-    password = params['password']
-    u = User.first_or_create(:golfId => golfId, :password => password)
-    u.scrape
-    return {
-        :status => "Created calendar", 
-        :golfId => u.golfId, 
-        :url => url("cal/#{u.golfId}/")
-    }.to_json
+  content_type :json
+
+  params = JSON.parse(request.env["rack.input"].read)
+  golfId = params['golfId']
+  password = params['password']
+  u = User.first_or_create(:golfId => golfId, :password => password)
+  u.scrape
+
+  return {
+      :status => "Created calendar",
+      :golfId => u.golfId,
+      :url => url("cal/#{u.golfId}/")
+  }.to_json
 end
 
 get '/api/:golfId/' do
-    golfId = params[:golfId]
-    u = User.first(:golfId => golfId)
-    u.getResults.to_json
+  golfId = params[:golfId]
+  u = User.first(:golfId => golfId)
+  u.getResults.to_json
 end
 
 get '/cal/:golfId/?' do
-    golfId = params[:golfId]
-    u = User.first(:golfId => golfId)
-    u.scrape
-    u.getCalendar.to_ical
+  golfId = params[:golfId]
+  u = User.first(:golfId => golfId)
+  u.scrape
+  u.getCalendar.to_ical
 end
