@@ -9,6 +9,10 @@ get '/' do
     haml :index
 end
 
+get '/:golfId/' do
+    haml :detailPage
+end
+
 post '/createCal/' do
     content_type :json
     params = JSON.parse(request.env["rack.input"].read)
@@ -21,6 +25,12 @@ post '/createCal/' do
         :golfId => u.golfId, 
         :url => url("cal/#{u.golfId}/")
     }.to_json
+end
+
+get '/api/:golfId/' do
+    golfId = params[:golfId]
+    u = User.first(:golfId => golfId)
+    u.getResults.to_json
 end
 
 get '/cal/:golfId/?' do

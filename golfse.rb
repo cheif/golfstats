@@ -52,7 +52,7 @@ class GolfSE
         m = /_roundData\s*= (.*?);/.match(scriptTag.content)
         jsonData = m[1]
         json_rounds = JSON.parse(jsonData)
-        rounds = json_rounds.map do |k, json|
+        json_rounds.map do |k, json|
             Round.create_from_scrape(@user, json)
         end
     end
@@ -73,12 +73,15 @@ class GolfSE
         end
 
         m = /_data\s*= (.*?);/.match(scriptTag.content)
-        data = JSON.parse(m[1])
-        json_results = data['Holes']
-        json_results.each do |data|
-            hole = Hole.first(:course => round.course, :number => data['Number'])
-            HoleResult.first_or_create(:round => round, :hole => hole,
-                                       :score => data['GrossScore'])
+        if m[1] != 'null'
+            # Data might be null if there is no result added
+            data = JSON.parse(m[1])
+            json_results = data['Holes']
+            json_results.map do |data|
+                hole = Hole.first(:course => round.course, :number => data['Number'])
+                HoleResult.first_or_create(:round => round, :hole => hole,
+                                           :score => data['GrossScore'])
+            end
         end
     end
 end

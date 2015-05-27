@@ -35,6 +35,26 @@ class User
         cal.publish
         cal
     end
+
+    def getResults
+        Course.all().map do |course|
+            {
+                :courseName => course.name,
+                :holes => course.holes.map do |hole|
+                    {
+                        :number => hole.number,
+                        :results => hole.holeResults.all(:round => {:user => self}).map do |res|
+                            {
+                                'score' => res.score,
+                                'date' => res.round.date,
+                            }
+                        end
+                    }
+                end
+            }
+        end
+    end
+
 end
 
 class Course
@@ -56,6 +76,7 @@ class Hole
     property :index,        Integer
 
     belongs_to :course
+    has n, :holeResults
 end
 
 class Round
